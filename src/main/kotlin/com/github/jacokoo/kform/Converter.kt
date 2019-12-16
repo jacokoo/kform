@@ -56,6 +56,10 @@ class FloatConverter(private val min: Float, private val max: Float): Converter<
     }
 }
 
+class BooleanConverter(): Converter<Boolean> {
+    override fun convert(name: String, input: String): Boolean = input != "false" && input != "0"
+}
+
 class DateConverter(private val format: String): Converter<LocalDate> {
     private val formatter = DateTimeFormatter.ofPattern(format)
     override fun convert(name: String, input: String): LocalDate = wrap("$name is not in date form $format") {

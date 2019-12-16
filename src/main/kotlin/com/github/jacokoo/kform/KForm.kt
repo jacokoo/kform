@@ -14,6 +14,7 @@ interface KForm {
     fun FormData.int(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE) = FormProperty(this, IntConverter(min, max))
     fun FormData.long(min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE) = FormProperty(this, LongConverter(min, max))
     fun FormData.float(min: Float = Float.MIN_VALUE, max: Float = Float.MAX_VALUE) = FormProperty(this, FloatConverter(min, max))
+    fun FormData.bool() = FormProperty(this, BooleanConverter())
     fun FormData.date(format: String = "yyyy-MM-dd") = FormProperty(this, DateConverter(format))
     fun FormData.dateTime(format: String = "yyyy-MM-dd HH:mm:ss") = FormProperty(this, DateTimeConverter(format))
     fun <T: Enum<T>> FormData.enum(clazz: KClass<T>) = FormProperty(this, EnumConverter(clazz.java))
