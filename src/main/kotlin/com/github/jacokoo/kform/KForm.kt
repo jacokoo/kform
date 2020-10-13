@@ -7,7 +7,13 @@ import kotlin.reflect.KClass
 
 class ViolationException(message: String, cause: Throwable? = null): RuntimeException(message, cause)
 
-class FormData(data: Map<String, String>): Map<String, String> by data
+interface FormData {
+    operator fun get(key: String): Any?
+}
+
+data class MapFormData(val map: Map<String, Any>): FormData {
+    override fun get(key: String): Any? = map[key]
+}
 
 interface KForm {
     fun FormData.string(pattern: String? = null) = FormProperty(this, StringConverter(pattern))

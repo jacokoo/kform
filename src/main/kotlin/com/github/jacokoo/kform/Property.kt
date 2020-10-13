@@ -6,7 +6,7 @@ import kotlin.reflect.KProperty
 class FormProperty<T>(private val data: FormData, private val converter: Converter<T>): ReadOnlyProperty<KForm, T?> {
     override fun getValue(thisRef: KForm, property: KProperty<*>): T? =
         data[property.name].let {
-            if (it.isNullOrBlank()) null
+            if (it == null) null
             else converter.convert(property.name, it)
         }
 
@@ -17,7 +17,7 @@ class FormProperty<T>(private val data: FormData, private val converter: Convert
 class RequiredFormProperty<T>(private val data: FormData, private val converter: Converter<T>): ReadOnlyProperty<KForm, T> {
     override fun getValue(thisRef: KForm, property: KProperty<*>): T =
         data[property.name].let {
-            if (it.isNullOrBlank()) throw ViolationException("${property.name} is required")
+            if (it == null) throw ViolationException("${property.name} is required")
             else converter.convert(property.name, it)
         }
 }

@@ -1,7 +1,7 @@
 package com.github.jacokoo.kform.spring
 
-import com.github.jacokoo.kform.FormData
 import com.github.jacokoo.kform.KForm
+import com.github.jacokoo.kform.MapFormData
 import org.springframework.core.MethodParameter
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -28,7 +28,7 @@ class KFormArgumentResolver: HandlerMethodArgumentResolver {
         it?.let { (it as Map<String, String>).mapValues { v -> arrayOf(v.value) } } ?: mapOf()
     })
         .filter { it.value.isNotEmpty() }
-        .let { FormData(it.mapValues { v -> v.value[0] }) }
+        .let { MapFormData(it.mapValues { v -> v.value[0] }) }
         .let { parameter.parameterType.constructors[0].newInstance(it) }
 
 }
