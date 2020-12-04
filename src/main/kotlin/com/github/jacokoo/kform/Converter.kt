@@ -52,6 +52,7 @@ class IntConverter(private val min: Int, private val max: Int): Converter<Int> {
 class LongConverter(private val min: Long, private val max: Long): Converter<Long> {
     override fun convert(name: String, input: Any): Long = when(input) {
         is Long -> input
+        is Int -> input.toLong()
         is String -> wrap("$name is not a long value") {
             input.toLong().also {
                 if (it < min || it > max) illegal(name)
@@ -64,6 +65,7 @@ class LongConverter(private val min: Long, private val max: Long): Converter<Lon
 class FloatConverter(private val min: Float, private val max: Float): Converter<Float> {
     override fun convert(name: String, input: Any): Float = when(input) {
         is Float -> input
+        is Double -> input.toFloat()
         is String -> wrap("$name is not a float value") {
             input.toFloat().also {
                 if (it < min || it > max) illegal(name)
