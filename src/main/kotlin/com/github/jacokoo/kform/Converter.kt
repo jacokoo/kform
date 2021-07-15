@@ -21,7 +21,6 @@ interface Converter<T> {
         } catch (e: ViolationException) {
             throw e
         } catch (e: Exception) {
-            e.printStackTrace()
             fire(msg, e)
         }
     }

@@ -4,15 +4,15 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 object Checker {
-    fun assert(cond: Boolean, msg: String) {
-        if (!cond) throw ViolationException("assert fail: $msg")
+    fun ensure(cond: Boolean, msg: () -> String) {
+        if (!cond) throw ViolationException(msg())
     }
 
     internal fun <T> check(name: String, value: T, fn: CheckFn<T>) {
         try {
             fn(value)
         } catch (e: ViolationException) {
-            throw ViolationException("$name ${e.message}")
+            throw ViolationException("$name: ${e.message}")
         }
     }
 }

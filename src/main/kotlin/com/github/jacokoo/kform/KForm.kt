@@ -5,7 +5,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
-class ViolationException(message: String, cause: Throwable? = null): RuntimeException(message, cause)
+class ViolationException(message: String, cause: Throwable? = null): RuntimeException(message, cause) {
+    override fun fillInStackTrace(): Throwable {
+        return this
+    }
+}
 
 interface FormData {
     operator fun get(key: String): Any?
