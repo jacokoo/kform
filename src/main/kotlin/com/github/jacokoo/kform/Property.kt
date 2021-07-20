@@ -4,8 +4,8 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 object Checker {
-    fun ensure(cond: Boolean, msg: () -> String) {
-        if (!cond) throw ViolationException(msg())
+    fun ensure(cond: Boolean, msg: (() -> String)? = null) {
+        if (!cond) throw ViolationException(if (msg == null) "invalid" else msg())
     }
 
     internal fun <T> check(name: String, value: T, fn: CheckFn<T>) {
