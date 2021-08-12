@@ -21,7 +21,7 @@ interface Converter<T> {
         } catch (e: ViolationException) {
             throw e
         } catch (e: Exception) {
-            fire(msg, e)
+            fire(msg, null)
         }
     }
 
@@ -107,7 +107,9 @@ class DateTimeConverter(private val format: String): Converter<LocalDateTime> {
 
 class EnumConverter<T: Enum<T>>(private val clazz: Class<T>): Converter<T> {
     private val intConverter = IntConverter(0, clazz.enumConstants.size - 1)
-    override fun convert(name: String, input: Any): T = clazz.enumConstants[intConverter.convert(name, input)]
+    override fun convert(name: String, input: Any): T = wrap("$name is not a valid enum value") {
+        clazz.enumConstants[intConverter.convert(name, input)]
+    }
 }
 
 class ListConverter<T>(private val separator: String = ",", private val sub: Converter<T>): Converter<List<T>> {

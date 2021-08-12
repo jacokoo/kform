@@ -5,7 +5,7 @@
 
     <groupId>com.github.jacokoo</groupId>
     <artifactId>kform</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <packaging>jar</packaging>
 
     <name>com.github.jacokoo kform</name>
@@ -92,11 +92,4 @@
 
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>internal</id>
-            <name>internal</name>
-            <url>http://175.24.134.182:33333/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
 </project>
