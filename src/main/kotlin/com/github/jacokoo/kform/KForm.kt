@@ -20,8 +20,8 @@ data class MapFormData(val map: Map<String, Any>): FormData {
 }
 
 interface KForm {
-    fun FormData.string(pattern: String? = null, fn: CheckFn<String?> = {}) =
-        FormProperty(this, StringConverter(pattern), fn, createValueGetter())
+    fun FormData.string(pattern: String? = null, maxLength: Int? = null, fn: CheckFn<String?> = {}) =
+        FormProperty(this, StringConverter(pattern, maxLength), fn, createValueGetter())
 
     fun FormData.int(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, fn: CheckFn<Int?> = {}) =
         FormProperty(this, IntConverter(min, max), fn, createValueGetter())
@@ -44,14 +44,14 @@ interface KForm {
     fun <T: Enum<T>> FormData.enum(clazz: KClass<T>, fn: CheckFn<T?> = {}) =
         FormProperty(this, EnumConverter(clazz.java), fn, createValueGetter())
 
-    fun FormData.stringList(separator: String = ",", pattern: String? = null, fn: CheckFn<List<String>?> = {}) =
-        FormProperty(this, ListConverter(separator, StringConverter(pattern)), fn, createValueGetter())
+    fun FormData.stringList(separator: String = ",", pattern: String? = null, maxLength: Int? = null, fn: CheckFn<List<String>?> = {}) =
+        FormProperty(this, ListConverter(separator, StringConverter(pattern, null), maxLength), fn, createValueGetter())
 
-    fun FormData.intList(separator: String = ",", min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, fn: CheckFn<List<Int>?> = {}) =
-        FormProperty(this, ListConverter(separator, IntConverter(min, max)), fn, createValueGetter())
+    fun FormData.intList(separator: String = ",", maxLength: Int? = null, min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, fn: CheckFn<List<Int>?> = {}) =
+        FormProperty(this, ListConverter(separator, IntConverter(min, max), maxLength), fn, createValueGetter())
 
-    fun FormData.longList(separator: String = ",", min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE, fn: CheckFn<List<Long>?> = {}) =
-        FormProperty(this, ListConverter(separator, LongConverter(min, max)), fn, createValueGetter())
+    fun FormData.longList(separator: String = ",", maxLength: Int? = null, min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE, fn: CheckFn<List<Long>?> = {}) =
+        FormProperty(this, ListConverter(separator, LongConverter(min, max), maxLength), fn, createValueGetter())
 
     fun createValueGetter(): ValueGetter = DefaultValueGetter()
 }

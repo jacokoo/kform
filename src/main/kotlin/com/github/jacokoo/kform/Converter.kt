@@ -27,11 +27,12 @@ interface Converter<T> {
 
 }
 
-class StringConverter(pattern: String?): Converter<String> {
+class StringConverter(pattern: String?, private val maxLength: Int?): Converter<String> {
     private val regexp: Regex? = pattern?.let { Regex(it) }
     override fun convert(name: String, input: Any): String {
         val i = input.toString()
         if (regexp != null && !regexp.matches(i)) illegal(name)
+        if (maxLength != null && i.length > maxLength) illegal(name)
         return i
     }
 }
@@ -112,11 +113,14 @@ class EnumConverter<T: Enum<T>>(private val clazz: Class<T>): Converter<T> {
     }
 }
 
-class ListConverter<T>(private val separator: String = ",", private val sub: Converter<T>): Converter<List<T>> {
+class ListConverter<T>(private val separator: String = ",", private val sub: Converter<T>, private val maxLength: Int?): Converter<List<T>> {
     override fun convert(name: String, input: Any): List<T> = when(input) {
         is Array<*> -> input.map { sub.convert(name, it ?: illegal(name)) }
         is List<*> -> input.map { sub.convert(name, it ?: illegal(name)) }
-        is String -> input.split(separator).map { sub.convert(name, it.trim()) }
+        is String -> {
+            if (maxLength != null && input.length > maxLength) illegal(name)
+            input.split(separator).map { sub.convert(name, it.trim()) }
+        }
         else -> illegal(name)
     }
 }
