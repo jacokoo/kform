@@ -25,4 +25,34 @@ fun main() {
 
     println(form.longList)
 }
+
+enum class E { E1, E2 }
+
+class AS(data: FormData): KForm() {
+    val s1 by data.of(int()).required()
+    val s2 by data.bool().required()
+}
+
+class AA(data: FormData): KForm() {
+    val a by data.string().name("aa")
+    val b by data.long(min = 10, max = 200).default(11) { it % 2 == 0L }
+    val demoEnum by data.enum<E>().required()
+    val list by data.listOf(int()) { it.isNotEmpty() }
+    val ss by data.beanOf<AS>()
+    val sss by data.listOf<AS>()
+}
+
+fun main() {
+    val aa = create(AA::class.java, MapFormData(mapOf(
+        "aa" to "3",
+        "b" to "12",
+        "demoEnum" to "1",
+        "list" to "1,2,3,4",
+        "ss.s1" to "1",
+        "ss.s2" to "0"
+    )))
+
+    println(aa)
+}
+
 ```

@@ -5,7 +5,7 @@
 
     <groupId>com.github.jacokoo</groupId>
     <artifactId>kform</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <name>com.github.jacokoo kform</name>
@@ -42,6 +42,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <url>https://monacohq.jfrog.io/artifactory/dolphin-java-local</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>

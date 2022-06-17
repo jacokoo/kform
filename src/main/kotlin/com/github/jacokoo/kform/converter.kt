@@ -111,29 +111,3 @@ class EnumConverter<T: Enum<T>>(private val clazz: Class<T>): Converter<T> {
         intConverter.convert(name, input).map { clazz.enumConstants[it] }
     }
 }
-
-class ListConverter<T>(
-    private val separator: String = ",",
-    private val sub: Converter<T>,
-    private val maxLength: Int?
-): Converter<List<T>> {
-
-    override fun convert(name: String, input: Any): Result<List<T>> = when(input) {
-        is Array<*> -> inner(name, input.asIterable())
-        is List<*> -> inner(name, input)
-        is String -> {
-            if (maxLength != null && input.length > maxLength) illegal(name)
-            inner(name, input.split(separator).map { it.trim() })
-        }
-        else -> illegal(name)
-    }
-
-    @Suppress("unchecked_cast")
-    private fun inner(name: String, items: Iterable<*>): Result<List<T>> =
-        Result.success(items.map {
-            if (it == null) return illegal(name)
-            val re = sub.convert(name, it)
-            if (re.isFailure) return re as Result<List<T>>
-            re.getOrThrow()
-        })
-}
