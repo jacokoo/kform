@@ -9,8 +9,8 @@ internal fun <T> invalid(name: String, s: String = "invalid") = Result.failure<T
 interface Converter<T> {
     fun convert(name: String, input: Any): Result<T>
 
-    fun fail(message: String, cause: Throwable? = null) =
-        Result.failure<T>(ViolationException(message, cause))
+    fun fail(message: String) =
+        Result.failure<T>(ViolationException(message))
 
     fun illegal(name: String): Result<T> = invalid(name)
 
@@ -18,57 +18,53 @@ interface Converter<T> {
         try {
             block()
         } catch (e: Exception) {
-            fail(msg, null)
+            fail(msg)
         }
-
 }
 
 class StringConverter(pattern: String?, private val maxLength: Int?): Converter<String> {
     private val regexp: Regex? = pattern?.let { Regex(it) }
     override fun convert(name: String, input: Any): Result<String> {
         val i = input.toString()
-        if (regexp != null && !regexp.matches(i)) illegal(name)
-        if (maxLength != null && i.length > maxLength) illegal(name)
+        if (regexp != null && !regexp.matches(i)) return illegal(name)
+        if (maxLength != null && i.length > maxLength) return illegal(name)
         return Result.success(i)
     }
 }
 
-class IntConverter(private val min: Int, private val max: Int): Converter<Int> {
+abstract class ComparableConverter<T: Comparable<T>>(val min: T, val max: T): Converter<T> {
+    fun T.ensureRange(name: String) =
+        if (this < min || this > max) illegal(name)
+        else Result.success(this)
+}
+
+class IntConverter(min: Int, max: Int): ComparableConverter<Int>(min, max) {
     override fun convert(name: String, input: Any) = when(input) {
-        is Int -> Result.success(input)
+        is Int -> input.ensureRange(name)
         is String -> wrap("$name is not an int value") {
-            input.toInt().let {
-                if (it < min || it > max) illegal(name)
-                else Result.success(it)
-            }
+            input.toInt().ensureRange(name)
         }
         else -> illegal(name)
     }
 }
 
-class LongConverter(private val min: Long, private val max: Long): Converter<Long> {
+class LongConverter(min: Long, max: Long): ComparableConverter<Long>(min, max) {
     override fun convert(name: String, input: Any) = when(input) {
-        is Long -> Result.success(input)
-        is Int -> Result.success(input.toLong())
+        is Long -> input.ensureRange(name)
+        is Int -> input.toLong().ensureRange(name)
         is String -> wrap("$name is not a long value") {
-            input.toLong().let {
-                if (it < min || it > max) illegal(name)
-                else Result.success(it)
-            }
+            input.toLong().ensureRange(name)
         }
         else -> illegal(name)
     }
 }
 
-class FloatConverter(private val min: Float, private val max: Float): Converter<Float> {
+class FloatConverter(min: Float, max: Float): ComparableConverter<Float>(min, max) {
     override fun convert(name: String, input: Any) = when(input) {
-        is Float -> Result.success(input)
-        is Double -> Result.success(input.toFloat())
+        is Float -> input.ensureRange(name)
+        is Double -> input.toFloat().ensureRange(name)
         is String -> wrap("$name is not a float value") {
-            input.toFloat().let {
-                if (it < min || it > max) illegal(name)
-                else Result.success(it)
-            }
+            input.toFloat().ensureRange(name)
         }
         else -> illegal(name)
     }
@@ -79,6 +75,7 @@ class BooleanConverter: Converter<Boolean> {
         is Boolean -> input
         "false" -> false
         "0" -> false
+        0 -> false
         else -> true
     })
 }

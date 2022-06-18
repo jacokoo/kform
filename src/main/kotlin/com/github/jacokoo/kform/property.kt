@@ -139,6 +139,9 @@ class ListBeanProperty<T: KForm>(
         if (data !is SupportBeanList) throw RuntimeException("the form data $data doesn't support bean list")
     }
 
+    fun name(name: String) = this.also { key = fixedKey(name) }
+    fun snake() = this.also { key = SnakeKey }
+
     override fun doGet(name: String): Result<List<T>> = key(name).let { n ->
         (data as SupportBeanList).list(n).innerMap { createBean(n, clazz, it) }.check(n, fn)
     }
