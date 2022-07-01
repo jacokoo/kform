@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class ConverterTest: DescribeSpec({
 
@@ -96,20 +97,20 @@ class ConverterTest: DescribeSpec({
 
     describe("date converter") {
         it("should keep the origin value if the input value is LocalDate") {
-            val con = DateConverter("")
+            val con = DateConverter(DateTimeFormatter.ISO_DATE)
             val date = LocalDate.now()
             con.convert("", date).getOrThrow() shouldBe date
         }
 
         it("should use `format` to parse the input") {
-            val con = DateConverter("yyyy/MM-dd")
+            val con = DateConverter(DateTimeFormatter.ofPattern("yyyy/MM-dd"))
             val date = LocalDate.of(2022, 6, 18)
             con.convert("", "2022/06-18").getOrThrow() shouldBe date
             con.convert("", "2022-06-18").isFailure shouldBe true
         }
 
         it("should complain for other inputs") {
-            val con = DateConverter("")
+            val con = DateConverter(DateTimeFormatter.ISO_DATE)
             con.convert("", 0).isFailure shouldBe true
         }
     }
@@ -117,20 +118,20 @@ class ConverterTest: DescribeSpec({
 
     describe("date time converter") {
         it("should keep the origin value if the input value is LocalDateTime") {
-            val con = DateTimeConverter("")
+            val con = DateTimeConverter(DateTimeFormatter.ISO_DATE)
             val date = LocalDateTime.now()
             con.convert("", date).getOrThrow() shouldBe date
         }
 
         it("should use `format` to parse the input") {
-            val con = DateTimeConverter("yyyy/MM-dd HH:mm/ss")
+            val con = DateTimeConverter(DateTimeFormatter.ofPattern("yyyy/MM-dd HH:mm/ss"))
             val date = LocalDateTime.of(2022, 6, 18, 16, 27, 0)
             con.convert("", "2022/06-18 16:27/00").getOrThrow() shouldBe date
             con.convert("", "2022-06-18 16:27:00").isFailure shouldBe true
         }
 
         it("should complain for other inputs") {
-            val con = DateTimeConverter("")
+            val con = DateTimeConverter(DateTimeFormatter.ISO_DATE)
             con.convert("", 0).isFailure shouldBe true
         }
     }

@@ -80,22 +80,20 @@ class BooleanConverter: Converter<Boolean> {
     })
 }
 
-class DateConverter(private val format: String): Converter<LocalDate> {
-    private val formatter = DateTimeFormatter.ofPattern(format)
+class DateConverter(private val formatter: DateTimeFormatter): Converter<LocalDate> {
     override fun convert(name: String, input: Any) = when(input) {
         is LocalDate -> Result.success(input)
-        is String -> wrap("$name is not in date form $format") {
+        is String -> wrap("$name is not in date form $formatter") {
             Result.success(LocalDate.parse(input, formatter))
         }
         else -> illegal(name)
     }
 }
 
-class DateTimeConverter(private val format: String): Converter<LocalDateTime> {
-    private val formatter = DateTimeFormatter.ofPattern(format)
+class DateTimeConverter(private val formatter: DateTimeFormatter): Converter<LocalDateTime> {
     override fun convert(name: String, input: Any) = when(input) {
         is LocalDateTime -> Result.success(input)
-        is String -> wrap("$name is not in date time form $format") {
+        is String -> wrap("$name is not in date time form $formatter") {
             Result.success(LocalDateTime.parse(input, formatter))
         }
         else -> illegal(name)

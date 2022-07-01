@@ -5,7 +5,7 @@
 
     <groupId>com.github.jacokoo</groupId>
     <artifactId>kform</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
     <packaging>jar</packaging>
 
     <name>com.github.jacokoo kform</name>

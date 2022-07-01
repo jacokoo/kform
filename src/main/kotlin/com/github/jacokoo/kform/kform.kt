@@ -3,6 +3,7 @@ package com.github.jacokoo.kform
 import java.lang.reflect.Modifier
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
@@ -19,6 +20,9 @@ fun <T: KForm> create(key: Class<T>, data: FormData, eagerCheck: Boolean = true)
 }
 
 abstract class KForm(protected val key: KeyGetter = defaultKey) {
+    protected open val defaultDateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    protected open val defaultDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
     internal val properties = mutableListOf<CachedProperty<*>>()
 
     fun <T> FormData.of(converter: Converter<T>, fn: CheckFn<T> = { true }) =
@@ -44,8 +48,8 @@ abstract class KForm(protected val key: KeyGetter = defaultKey) {
     protected fun long(min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE) = LongConverter(min, max)
     protected fun float(min: Float = Float.MIN_VALUE, max: Float = Float.MAX_VALUE) = FloatConverter(min, max)
     protected fun bool() = BooleanConverter()
-    protected fun date(format: String = "yyyy-MM-dd") = DateConverter(format)
-    protected fun dateTime(format: String = "yyyy-MM-dd HH:mm:ss") = DateTimeConverter(format)
+    protected fun date(format: DateTimeFormatter = defaultDateFormat) = DateConverter(format)
+    protected fun dateTime(format: DateTimeFormatter = defaultDateTimeFormat) = DateTimeConverter(format)
     protected inline fun <reified T: Enum<T>> enum() = EnumConverter(T::class.java)
 
     fun validate() { validate(this) }
@@ -67,10 +71,10 @@ abstract class KForm(protected val key: KeyGetter = defaultKey) {
     fun FormData.bool(fn: CheckFn<Boolean> = { true }) =
         of(BooleanConverter(), fn)
 
-    fun FormData.date(format: String = "yyyy-MM-dd", fn: CheckFn<LocalDate> = { true }) =
+    fun FormData.date(format: DateTimeFormatter = defaultDateFormat, fn: CheckFn<LocalDate> = { true }) =
         of(DateConverter(format), fn)
 
-    fun FormData.dateTime(format: String = "yyyy-MM-dd HH:mm:ss", fn: CheckFn<LocalDateTime> = { true }) =
+    fun FormData.dateTime(format: DateTimeFormatter = defaultDateTimeFormat, fn: CheckFn<LocalDateTime> = { true }) =
         of(DateTimeConverter(format), fn)
 
     inline fun <reified T: Enum<T>> FormData.enum(noinline fn: CheckFn<T> = { true }) =
