@@ -17,11 +17,12 @@ val SnakeKey: KeyGetter = { p ->
 
 open class FormProperty<T>(
     private val form: KForm,
+    private val clazz: Class<T>,
     private val data: FormData,
     private val converter: Converter<T>,
     private val fn: CheckFn<T>,
     private var key: KeyGetter
-): CachedProperty<T?>() {
+): CachedProperty<T?>(), PropertyDescribe {
     override fun doGet(name: String): Result<T?> = key(name).let { n ->
         data[n].let {
             if (it == null) Result.success(null)
@@ -33,49 +34,58 @@ open class FormProperty<T>(
     fun snake() = this.also { key = SnakeKey }
 
     fun required(fn: CheckFn<T> = { true }) =
-        RequiredFormProperty(key, data, converter, fn).also { form.properties.replace(this, it) }
+        RequiredFormProperty(clazz, key, data, converter, fn).also { form.properties.replace(this, it) }
 
     fun default(d: T, fn: CheckFn<T> = { true }) =
-        DefaultValueProperty(key, data, converter, d, fn).also { form.properties.replace(this, it) }
+        DefaultValueProperty(clazz, key, data, converter, d, fn).also { form.properties.replace(this, it) }
 
+    override fun describe(name: String) = NormalFieldType(clazz, key(name), converter.describe(), false, null)
 }
 
 class RequiredFormProperty<T>(
+    private val clazz: Class<T>,
     private val key: KeyGetter,
     private val data: FormData,
     private val converter: Converter<T>,
     private val fn: CheckFn<T>
-): CachedProperty<T>() {
+): CachedProperty<T>(), PropertyDescribe {
     override fun doGet(name: String): Result<T> = key(name).let { n ->
         data[n].let {
             if (it == null) invalid(n, "required")
             else converter.convert(n, it).check(n, fn)
         }
     }
+
+    override fun describe(name: String) = NormalFieldType(clazz, key(name), converter.describe(), true, null)
 }
 
 class DefaultValueProperty<T>(
+    private val clazz: Class<T>,
     private val key: KeyGetter,
     private val data: FormData,
     private val converter: Converter<T>,
     private val default: T,
     private val fn: CheckFn<T>
-): CachedProperty<T>() {
+): CachedProperty<T>(), PropertyDescribe {
     override fun doGet(name: String): Result<T> = key(name).let { n ->
         data[n].let {
             if (it == null) Result.success(default)
             else converter.convert(n, it).check(n, fn)
         }
     }
+
+    override fun describe(name: String) = NormalFieldType(clazz, key(name), converter.describe(), false, "$default")
 }
 
 class PrimitiveListProperty<T>(
+    private val clazz: Class<T>,
+    private val metadata: Map<String, Any>,
     private val separator: String,
     private val converter: Converter<T>,
     private val data: FormData,
     private val fn: CheckFn<List<T>>,
     private var key: KeyGetter
-): CachedProperty<List<T>>() {
+): CachedProperty<List<T>>(), PropertyDescribe {
     init {
         if (data !is SupportPrimitiveList) throw RuntimeException("the form data $data doesn't support primitive list")
     }
@@ -88,6 +98,10 @@ class PrimitiveListProperty<T>(
             .innerMap { converter.convert(n, it) }
             .check(n, fn)
     }
+
+    override fun describe(name: String) = ListFieldType(key(name), metadata, NormalFieldType(
+        clazz, "", converter.describe(), true, null
+    ))
 }
 
 private fun <T: KForm> createBean(name: String, clazz: KClass<T>, data: FormData): Result<T> =
@@ -102,7 +116,7 @@ class BeanProperty<T: KForm>(
     private val data: FormData,
     private val fn: CheckFn<T>,
     private var key: KeyGetter
-): CachedProperty<T?>() {
+): CachedProperty<T?>(), PropertyDescribe {
     init {
         if (data !is SupportBean) throw RuntimeException("the form data $data doesn't support bean")
     }
@@ -116,6 +130,8 @@ class BeanProperty<T: KForm>(
 
     fun required(fn: CheckFn<T> = { true }) =
         RequiredBeanProperty(clazz, data, fn, key).also { form.properties.replace(this, it) }
+
+    override fun describe(name: String) = describe(clazz.java, key(name))
 }
 
 class RequiredBeanProperty<T: KForm> internal constructor(
@@ -123,18 +139,21 @@ class RequiredBeanProperty<T: KForm> internal constructor(
     private val data: FormData,
     private val fn: CheckFn<T>,
     private var key: KeyGetter
-): CachedProperty<T>() {
+): CachedProperty<T>(), PropertyDescribe {
     override fun doGet(name: String): Result<T> = key(name).let { n ->
         (data as SupportBean).bean(n)?.flatMap { createBean(n, clazz, it) }?.check(n, fn) ?: invalid(n)
     }
+
+    override fun describe(name: String): FieldType = describe(clazz.java, key(name), true)
 }
 
 class ListBeanProperty<T: KForm>(
     private val clazz: KClass<T>,
     private val data: FormData,
+    private val metadata: Map<String, Any>,
     private val fn: CheckFn<List<T>>,
     private var key: KeyGetter
-): CachedProperty<List<T>>() {
+): CachedProperty<List<T>>(), PropertyDescribe {
     init {
         if (data !is SupportBeanList) throw RuntimeException("the form data $data doesn't support bean list")
     }
@@ -145,6 +164,9 @@ class ListBeanProperty<T: KForm>(
     override fun doGet(name: String): Result<List<T>> = key(name).let { n ->
         (data as SupportBeanList).list(n).innerMap { createBean(n, clazz, it) }.check(n, fn)
     }
+
+    override fun describe(name: String) =
+        ListBeanFieldType(key(name), metadata, describe(clazz.java))
 }
 
 abstract class CachedProperty<T>: ReadOnlyProperty<Any?, T> {

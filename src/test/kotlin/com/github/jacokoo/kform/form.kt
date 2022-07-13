@@ -70,6 +70,7 @@ class ListBeanForm(data: FormData): KForm() {
 
 class PropertyTest: DescribeSpec({
     describe("primitive fields") {
+
         it("should complain if any field is invalid") {
             val form = PrimitiveForm(SimpleFormData(mapOf()))
 
