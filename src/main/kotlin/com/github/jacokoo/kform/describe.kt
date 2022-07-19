@@ -36,7 +36,7 @@ class ListFieldType(
     val inner: FieldType
 ): FieldType {
     override val type: String = "array of ${inner.type}"
-    override val defaultValue: String? = "empty list"
+    override val defaultValue: String = "[]"
     override val required: Boolean = false
 }
 
@@ -48,7 +48,7 @@ class BeanFieldType(
     val fields: List<Field>,
     val types: List<FieldType>
 ): FieldType {
-    override val type: String = "object (${clazz.simpleName})"
+    override val type: String = "object(${clazz.simpleName})"
     override val defaultValue: String? = null
 }
 
@@ -58,6 +58,6 @@ class ListBeanFieldType(
     val inner: BeanFieldType
 ): FieldType {
     override val type: String = "array of ${inner.type}"
-    override val defaultValue: String? = "empty list"
+    override val defaultValue: String? = "[]"
     override val required: Boolean = false
 }

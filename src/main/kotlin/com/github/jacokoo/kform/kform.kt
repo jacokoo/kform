@@ -41,8 +41,8 @@ abstract class KForm(protected val key: KeyGetter = defaultKey) {
     inline fun <reified T: KForm> FormData.listOf(metadata: Map<String, Any> = mapOf(), noinline fn: CheckFn<List<T>> = { true }) =
         createListOfBean(T::class, metadata, fn)
 
-    fun <T> FormData.createOf(clazz: Class<T>, converter: Converter<T>, fn: CheckFn<T>) =
-        FormProperty(this@KForm, clazz, this, converter, fn, key).also { properties.add(it) }
+    fun <T> FormData.createOf(clazz: Class<T>, converter: Converter<T>, fn: CheckFn<T>, data: FormData = this, kg: KeyGetter = key) =
+        FormProperty(this@KForm, clazz, data, converter, fn, kg).also { properties.add(it) }
 
     fun <T> FormData.createListOf(clazz: Class<T>, converter: Converter<T>, separator: String = ",", metadata: Map<String, Any>, fn: CheckFn<List<T>>) =
         PrimitiveListProperty(clazz, metadata, separator, converter, this, fn, key).also { properties.add(it) }

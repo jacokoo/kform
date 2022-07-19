@@ -124,7 +124,7 @@ class DateConverter(
 ): Converter<LocalDate> {
     override fun convert(name: String, input: Any) = when(input) {
         is LocalDate -> Result.success(input)
-        is String -> wrap("$name is not in date form $formatter") {
+        is String -> wrap("$name is not in date form") {
             Result.success(LocalDate.parse(input, formatter))
         }
         else -> illegal(name)
@@ -141,7 +141,7 @@ class DateTimeConverter(
 ): Converter<LocalDateTime> {
     override fun convert(name: String, input: Any) = when(input) {
         is LocalDateTime -> Result.success(input)
-        is String -> wrap("$name is not in date time form $formatter") {
+        is String -> wrap("$name is not in date time form") {
             Result.success(LocalDateTime.parse(input, formatter))
         }
         else -> illegal(name)
