@@ -41,6 +41,8 @@ abstract class KForm(protected val key: KeyGetter = defaultKey) {
     inline fun <reified T: KForm> FormData.listOf(metadata: Map<String, Any> = mapOf(), noinline fn: CheckFn<List<T>> = { true }) =
         createListOfBean(T::class, metadata, fn)
 
+    inline fun <reified T: KForm> FormData.inlineOf() = createInlineBean(T::class)
+
     fun <T> FormData.createOf(clazz: Class<T>, converter: Converter<T>, fn: CheckFn<T>, data: FormData = this, kg: KeyGetter = key) =
         FormProperty(this@KForm, clazz, data, converter, fn, kg).also { properties.add(it) }
 
@@ -52,6 +54,9 @@ abstract class KForm(protected val key: KeyGetter = defaultKey) {
 
     fun <T: KForm> FormData.createListOfBean(clazz: KClass<T>, metadata: Map<String, Any>, fn: CheckFn<List<T>>) =
         ListBeanProperty(clazz, this, metadata, fn, key).also { properties.add(it) }
+
+    fun <T: KForm> FormData.createInlineBean(clazz: KClass<T>) =
+        InlineBeanProperty(clazz, this).also { properties.add(it) }
 
     protected fun string(pattern: String? = null, maxLength: Int? = null, metadata: Map<String, Any> = mapOf()) = StringConverter(pattern, maxLength, metadata)
     protected fun int(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, metadata: Map<String, Any> = mapOf()) = IntConverter(min, max, metadata)

@@ -169,14 +169,23 @@ class ListBeanProperty<T: KForm>(
         ListBeanFieldType(key(name), metadata, describe(clazz.java))
 }
 
+class InlineBeanProperty<T: KForm>(
+    private val clazz: KClass<T>,
+    private val data: FormData
+): CachedProperty<T>(), PropertyDescribe {
+    override fun doGet(name: String): Result<T> =
+        createBean("", clazz, data)
+
+    override fun describe(name: String): FieldType =
+        InlineBeanFieldType(describe(clazz.java))
+}
+
 abstract class CachedProperty<T>: ReadOnlyProperty<Any?, T> {
     internal var value: Result<T>? = null
 
-    @Suppress("unchecked_cast")
     override fun getValue(thisRef: Any?, property: KProperty<*>): T =
         (value ?: get(property.name)).getOrThrow()
 
-    @Suppress("unchecked_cast")
     fun get(name: String): Result<T> =
         value ?: doGet(name).also { value = it }
 

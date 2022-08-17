@@ -58,6 +58,14 @@ class ListBeanFieldType(
     val inner: BeanFieldType
 ): FieldType {
     override val type: String = "array of ${inner.type}"
-    override val defaultValue: String? = "[]"
+    override val defaultValue: String = "[]"
     override val required: Boolean = false
+}
+
+class InlineBeanFieldType(val bean: BeanFieldType): FieldType {
+    override val defaultValue: String? = null
+    override val metadata: Map<String, Any> = mapOf()
+    override val name: String = ""
+    override val required: Boolean = true
+    override val type: String = ""
 }
